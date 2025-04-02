@@ -11,10 +11,7 @@ namespace Topic_2___Lists_and_Loops
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-
-        //random gen
-       
-        Random generator;
+      
 
         Rectangle window;
 
@@ -49,11 +46,23 @@ namespace Topic_2___Lists_and_Loops
             emojitextures = new List<Texture2D>();
             emojiRect = new List<Vector2>();
 
+            //bg texture
+            bgTexture = Content.Load<Texture2D>("bg");
+
+            //bg rect
+            window = new Rectangle(0, 0, 1280, 720);
+
             //list for rect and counted loops
-            for (int i = 0; i < 10; i++)
+            //the textures
+            for (int i = 1; i < 27; i++)
             {
-                emojitextures.Add(Content.Load<Texture2D>("emoji"));
-                emojiRect.Add(new Vector2(rand.Next(0, 1280), rand.Next(0, 720));
+                emojitextures.Add(Content.Load<Texture2D>($"emojipack/emoji({i})"));
+            }
+
+            //the rect
+            for (int i = 1; i < 27; i++)
+            {
+                emojiRect.Add(new Vector2(rand.Next(0,50), rand.Next(0,50)));
             }
         }
 
@@ -79,6 +88,19 @@ namespace Topic_2___Lists_and_Loops
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+            //draw bg
+            _spriteBatch.Draw(bgTexture, window, Color.White);
+
+            //draw emoji
+            for (int i = 0; i < emojitextures.Count; i++)
+            {
+                _spriteBatch.Draw(emojitextures[i], emojiRect[i], Color.White);
+            }
+
+
+            _spriteBatch.End();
+
 
             base.Draw(gameTime);
         }
