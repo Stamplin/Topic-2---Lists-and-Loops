@@ -86,6 +86,8 @@ namespace Topic_2___Lists_and_Loops
             MouseState mouseState = Mouse.GetState();
             x = mouseState.X;
             y = mouseState.Y;
+            MouseState currentMouseState, previousMouseState;
+            bool newclick = false;
 
             //if "r" is pressed
             if (Keyboard.GetState().IsKeyDown(Keys.R))
@@ -115,6 +117,7 @@ namespace Topic_2___Lists_and_Loops
                         if (emojiRect[i].Contains(x, y))
                         {
                             emojiRect.RemoveAt(i);
+                            emojitextures.RemoveAt(i);
                         }
                     }
                 }
@@ -124,13 +127,28 @@ namespace Topic_2___Lists_and_Loops
             //if e is pressed spawn in a emoji in the mouse position
             if (Keyboard.GetState().IsKeyDown(Keys.E))
             {
-                //and left is is pressed spawn in a emoji in the mouse position
+                //if mouse is PRESSED
                 if (mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    emojiRect.Add(new Rectangle(x, y, 100, 100));
+                    for (int i = 0; i < emojiRect.Count; i++)
+                    {
+                        if (emojiRect[i].Contains(x, y))
+                        {
+                            newclick = true;
+                        }
+                    }
+                    if (!newclick)
+                    {
+                        emojiRect.Add(new Rectangle(x - 50, y - 50, 100, 100));
+                        emojitextures.Add(Content.Load<Texture2D>($"emojipack/emoji({emojiRect.Count})"));
+                    }
                 }
+                
+
             }
 
+
+           
             base.Update(gameTime);
         }
 
