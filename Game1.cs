@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Topic_2___Lists_and_Loops
 {
@@ -11,7 +12,6 @@ namespace Topic_2___Lists_and_Loops
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-      
 
         Rectangle window;
 
@@ -19,9 +19,12 @@ namespace Topic_2___Lists_and_Loops
         Texture2D bgTexture;
         //emoji list
         List<Texture2D> emojitextures;
-        List<Vector2> emojiRect;
+        List<Rectangle> emojiRect;
 
+        //random
+        Random random = new Random();
 
+        int x, y;
 
         public Game1()
         {
@@ -35,7 +38,6 @@ namespace Topic_2___Lists_and_Loops
             // TODO: Add your initialization logic here
 
             base.Initialize();
-            Random rand = new Random();
 
             //set resolution
             _graphics.PreferredBackBufferWidth = 1280;
@@ -44,31 +46,31 @@ namespace Topic_2___Lists_and_Loops
 
             //list texture
             emojitextures = new List<Texture2D>();
-            emojiRect = new List<Vector2>();
-
-            //bg texture
-            bgTexture = Content.Load<Texture2D>("bg");
+            emojiRect = new List<Rectangle>();
 
             //bg rect
             window = new Rectangle(0, 0, 1280, 720);
 
-            //list for rect and counted loops
             //the textures
             for (int i = 1; i < 27; i++)
             {
                 emojitextures.Add(Content.Load<Texture2D>($"emojipack/emoji({i})"));
             }
 
-            //the rect
-            for (int i = 1; i < 27; i++)
+            for (int i = 0; i < 26; i++)
             {
-                emojiRect.Add(new Vector2(rand.Next(0,50), rand.Next(0,50)));
+                emojiRect.Add(new Rectangle(random.Next(0, 1280 - 100), random.Next(0, 720 - 100), 100, 100));
             }
+
+
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            //bg texture
+            bgTexture = Content.Load<Texture2D>("bg");
 
             // TODO: use this.Content to load your game content here
         }
@@ -79,6 +81,55 @@ namespace Topic_2___Lists_and_Loops
                 Exit();
 
             // TODO: Add your update logic here
+
+            //mouse cursor position
+            MouseState mouseState = Mouse.GetState();
+            x = mouseState.X;
+            y = mouseState.Y;
+
+            //if "r" is pressed
+            if (Keyboard.GetState().IsKeyDown(Keys.R))
+            {
+                //and left is pressed
+                if (mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    for (int i = 0; i < emojiRect.Count; i++)
+                    {
+                        if (emojiRect[i].Contains(x, y))
+                        {
+                            emojiRect[i] = new Rectangle(random.Next(0, 1280 - 100), random.Next(0, 720 - 100), 100, 100);
+                        }
+                    }
+                }
+               
+            }
+
+            //if q is pressed remove emoji
+            if (Keyboard.GetState().IsKeyDown(Keys.Q))
+            {
+                //and if left mouse is held
+                if (mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    for (int i = emojiRect.Count - 1; i >= 0; i--)
+                    {
+                        if (emojiRect[i].Contains(x, y))
+                        {
+                            emojiRect.RemoveAt(i);
+                        }
+                    }
+                }
+                
+            }
+
+            //if e is pressed spawn in a emoji in the mouse position
+            if (Keyboard.GetState().IsKeyDown(Keys.E))
+            {
+                //and left is is pressed spawn in a emoji in the mouse position
+                if (mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    emojiRect.Add(new Rectangle(x, y, 100, 100));
+                }
+            }
 
             base.Update(gameTime);
         }
@@ -92,10 +143,16 @@ namespace Topic_2___Lists_and_Loops
             //draw bg
             _spriteBatch.Draw(bgTexture, window, Color.White);
 
-            //draw emoji
-            for (int i = 0; i < emojitextures.Count; i++)
+            //draw 
+            int count = Math.Min(emojitextures.Count, emojiRect.Count);
+            for (int i = 0; i < count; i++)
             {
                 _spriteBatch.Draw(emojitextures[i], emojiRect[i], Color.White);
+                //if space is pressed reset pos
+                if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                {
+                    emojiRect[i] = new Rectangle(random.Next(0, 1280 - 100), random.Next(0, 720 - 100), 100, 100);
+                }
             }
 
 
