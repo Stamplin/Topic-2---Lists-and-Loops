@@ -21,6 +21,11 @@ namespace Topic_2___Lists_and_Loops
         List<Texture2D> emojitextures;
         List<Rectangle> emojiRect;
 
+        MouseState mouseState, previousMouseState;
+        KeyboardState keyboardState, previousKeyboardState;
+
+        bool newClick, newPress;
+
         //random
         Random random = new Random();
 
@@ -40,8 +45,10 @@ namespace Topic_2___Lists_and_Loops
             base.Initialize();
 
             //set resolution
-            _graphics.PreferredBackBufferWidth = 1280;
-            _graphics.PreferredBackBufferHeight = 720;
+            window = new Rectangle(0, 0, 1280, 720);
+
+            _graphics.PreferredBackBufferWidth = window.Width;
+            _graphics.PreferredBackBufferHeight = window.Height;
             _graphics.ApplyChanges();
 
             //list texture
@@ -49,7 +56,6 @@ namespace Topic_2___Lists_and_Loops
             emojiRect = new List<Rectangle>();
 
             //bg rect
-            window = new Rectangle(0, 0, 1280, 720);
 
             //the textures
             for (int i = 1; i < 27; i++)
@@ -59,7 +65,7 @@ namespace Topic_2___Lists_and_Loops
 
             for (int i = 0; i < 26; i++)
             {
-                emojiRect.Add(new Rectangle(random.Next(0, 1280 - 100), random.Next(0, 720 - 100), 100, 100));
+                emojiRect.Add(new Rectangle(random.Next(0, window.Width - 100), random.Next(0, window.Height - 100), 100, 100));
             }
 
 
@@ -83,23 +89,23 @@ namespace Topic_2___Lists_and_Loops
             // TODO: Add your update logic here
 
             //mouse cursor position
-            MouseState mouseState = Mouse.GetState();
-            x = mouseState.X;
-            y = mouseState.Y;
-            MouseState currentMouseState, previousMouseState;
-            bool newclick = false;
+            previousMouseState = mouseState;
+            mouseState = Mouse.GetState();
+            keyboardState = Keyboard.GetState();
+            
+            newClick = mouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released;
 
-            //if "r" is pressed
-            if (Keyboard.GetState().IsKeyDown(Keys.R))
+            //if "r" is pressed - Randomly moves emoji that already exists
+            if (keyboardState.IsKeyDown(Keys.R))
             {
                 //and left is pressed
                 if (mouseState.LeftButton == ButtonState.Pressed)
                 {
                     for (int i = 0; i < emojiRect.Count; i++)
                     {
-                        if (emojiRect[i].Contains(x, y))
+                        if (emojiRect[i].Contains(mouseState.Position))
                         {
-                            emojiRect[i] = new Rectangle(random.Next(0, 1280 - 100), random.Next(0, 720 - 100), 100, 100);
+                            emojiRect[i] = new Rectangle(random.Next(window.X, window.Width - 100), random.Next(window.Y, window.Height - 100), 100, 100);
                         }
                     }
                 }
@@ -107,17 +113,18 @@ namespace Topic_2___Lists_and_Loops
             }
 
             //if q is pressed remove emoji
-            if (Keyboard.GetState().IsKeyDown(Keys.Q))
+            if (keyboardState.IsKeyDown(Keys.Q))
             {
                 //and if left mouse is held
                 if (mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    for (int i = emojiRect.Count - 1; i >= 0; i--)
+                    for (int i = 0; i < emojiRect.Count; i++)
                     {
-                        if (emojiRect[i].Contains(x, y))
+                        if (emojiRect[i].Contains(mouseState.Position))
                         {
                             emojiRect.RemoveAt(i);
                             emojitextures.RemoveAt(i);
+                            i--;
                         }
                     }
                 }
@@ -125,30 +132,27 @@ namespace Topic_2___Lists_and_Loops
             }
 
             //if e is pressed spawn in a emoji in the mouse position
-            if (Keyboard.GetState().IsKeyDown(Keys.E))
-            {
+            if (keyboardState.IsKeyDown(Keys.E))           
                 //if mouse is PRESSED
-                if (mouseState.LeftButton == ButtonState.Pressed)
-                {
-                    for (int i = 0; i < emojiRect.Count; i++)
+                if (mouseState.LeftButton == ButtonState.Pressed && newClick)  
+                    if (emojitextures.Count < 26)
                     {
-                        if (emojiRect[i].Contains(x, y))
-                        {
-                            newclick = true;
-                        }
-                    }
-                    if (!newclick)
-                    {
-                        emojiRect.Add(new Rectangle(x - 50, y - 50, 100, 100));
+                        emojiRect.Add(new Rectangle(mouseState.X - 50, mouseState.Y - 50, 100, 100));
                         emojitextures.Add(Content.Load<Texture2D>($"emojipack/emoji({emojiRect.Count})"));
                     }
-                }
-                
 
+            //make space is pressed not held
+            if (keyboardState.IsKeyDown(Keys.Space) && previousKeyboardState.IsKeyUp(Keys.Space))
+            {
+                for (int i = 0; i < emojiRect.Count; i++)
+                {
+                    emojiRect[i] = new Rectangle(random.Next(window.X, window.Width - 100), random.Next(window.Y, window.Height - 100), 100, 100);
+                }
             }
 
-
-           
+            // Update previous keyboard state
+            previousKeyboardState = keyboardState;
+ 
             base.Update(gameTime);
         }
 
@@ -166,11 +170,6 @@ namespace Topic_2___Lists_and_Loops
             for (int i = 0; i < count; i++)
             {
                 _spriteBatch.Draw(emojitextures[i], emojiRect[i], Color.White);
-                //if space is pressed reset pos
-                if (Keyboard.GetState().IsKeyDown(Keys.Space))
-                {
-                    emojiRect[i] = new Rectangle(random.Next(0, 1280 - 100), random.Next(0, 720 - 100), 100, 100);
-                }
             }
 
 
