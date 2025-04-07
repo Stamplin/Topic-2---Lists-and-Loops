@@ -7,6 +7,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Topic_2___Lists_and_Loops
 {
+    enum GameState
+    {
+        Menu,
+        Game
+    }
 
     public class Game1 : Game
     {
@@ -16,7 +21,7 @@ namespace Topic_2___Lists_and_Loops
         Rectangle window;
 
         //load texture
-        Texture2D bgTexture;
+        Texture2D bgTexture, menuTexture;
         //emoji list
         List<Texture2D> emojitextures;
         List<Rectangle> emojiRect;
@@ -25,6 +30,10 @@ namespace Topic_2___Lists_and_Loops
         KeyboardState keyboardState, previousKeyboardState;
 
         bool newClick, newPress;
+
+        //load enum
+        GameState gameState = GameState.Menu;
+        GameState previousGameState = GameState.Menu;
 
         //random
         Random random = new Random();
@@ -55,8 +64,6 @@ namespace Topic_2___Lists_and_Loops
             emojitextures = new List<Texture2D>();
             emojiRect = new List<Rectangle>();
 
-            //bg rect
-
             //the textures
             for (int i = 1; i < 27; i++)
             {
@@ -77,6 +84,7 @@ namespace Topic_2___Lists_and_Loops
 
             //bg texture
             bgTexture = Content.Load<Texture2D>("bg");
+            menuTexture = Content.Load<Texture2D>("menu");
 
             // TODO: use this.Content to load your game content here
         }
@@ -160,20 +168,34 @@ namespace Topic_2___Lists_and_Loops
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
-            _spriteBatch.Begin();
-            //draw bg
-            _spriteBatch.Draw(bgTexture, window, Color.White);
-
-            //draw 
-            int count = Math.Min(emojitextures.Count, emojiRect.Count);
-            for (int i = 0; i < count; i++)
+            //enum gamestate
+            if (gameState == GameState.Menu)
             {
-                _spriteBatch.Draw(emojitextures[i], emojiRect[i], Color.White);
+                _spriteBatch.Begin();
+                _spriteBatch.Draw(menuTexture, window, Color.White);
+                _spriteBatch.End();
+            }
+
+            if (gameState == GameState.Game)
+            {
+                // TODO: Add your drawing code here
+                _spriteBatch.Begin();
+                //draw bg
+                _spriteBatch.Draw(bgTexture, window, Color.White);
+
+                //draw 
+                int count = Math.Min(emojitextures.Count, emojiRect.Count);
+                for (int i = 0; i < count; i++)
+                {
+                    _spriteBatch.Draw(emojitextures[i], emojiRect[i], Color.White);
+                }
+
+
+                _spriteBatch.End();
             }
 
 
-            _spriteBatch.End();
+           
 
 
             base.Draw(gameTime);
